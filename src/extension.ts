@@ -292,7 +292,7 @@ function getPlayerHtml(audioSrc: string, defaultVolume: number, name: string = '
 					</div>
 				</div>
 				<div class="controls">
-					<button id="play-pause">▶️</button>
+					<button id="play-pause">⏸️</button>
 				</div>
 			</div>
 			<audio id="audio" src="${audioSrc}" autoplay></audio>
@@ -308,6 +308,7 @@ function getPlayerHtml(audioSrc: string, defaultVolume: number, name: string = '
 			const volumeSlider = document.getElementById('volume-slider');
 
 			audio.volume = ${defaultVolume};
+			audio.play();
 
 			playPauseBtn.onclick = function() {
 				if (audio.paused) {
@@ -329,7 +330,8 @@ function getPlayerHtml(audioSrc: string, defaultVolume: number, name: string = '
 				totalTimeSpan.textContent = formatTime(audio.duration);
 			};
 			audio.onended = function() {
-				playPauseBtn.textContent = '▶️';
+				audio.currentTime = 0;
+				audio.play();
 			};
 
 			// 拖动进度条
