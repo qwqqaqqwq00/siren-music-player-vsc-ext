@@ -1,0 +1,74 @@
+{
+  "name": "music-player",
+  "displayName": "music-player",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "music-player.helloWorld",
+        "title": "Hello World"
+      },
+      {
+        "command": "music-player.selectAndDownload",
+        "title": "选择并下载塞壬唱片歌曲"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "music-player.selectAndDownload"
+        }
+      ]
+    },
+    "configuration": {
+      "type": "object",
+      "title": "music-player 配置",
+      "properties": {
+        "music-player.savePath": {
+          "type": "string",
+          "default": "",
+          "description": "本地曲目保存目录（绝对路径），为空则使用插件目录下 music 文件夹"
+        },
+        "music-player.volume": {
+          "type": "number",
+          "default": 1,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "播放器默认音量（0~1）"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@types/node-fetch": "^2.6.12",
+    "@types/vscode": "^1.100.0",
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.25.1",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "node-fetch": "^2.7.0"
+  }
+}
