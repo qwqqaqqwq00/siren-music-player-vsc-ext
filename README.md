@@ -1,71 +1,47 @@
+
 # music-player README
 
-This is the README for your extension "music-player". After writing up a brief description, we recommend including the following sections.
+A simple **music player extension** for Visual Studio Code that allows you to stream and play songs directly from the [Monster Siren](https://monster-siren.hypergryph.com/) music API. This extension supports searching, downloading, and playing songs without leaving your editor.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+* 🎵  **Browse and Select Songs** : Choose from a list of available songs via the Monster Siren API.
+* 📥  **Download & Cache** : Automatically downloads selected songs to a configurable path for local playback.
+* 🔊  **Playback Controls** : Play, pause, and adjust volume from within a dedicated webview panel.
+* ⏱️  **Progress Tracking** : Real-time progress bar and time display during playback.
+* 🔄  **Repeat Playback** : Toggle repeat mode to loop the current song.
+* 📁  **Resume on Startup** : Automatically resumes the last played track when VS Code restarts.
 
-For example if there is an image subfolder under your extension project workspace:
+> Tip: You can pin the player to always stay visible while working in other files.
 
-\!\[feature X\]\(images/feature-x.png\)
+### Example Screenshot
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+![Music Player Panel](vscode-webview://12umth60vshr7kt9flsqd2sivnfhuv3k4naaubf80ahtkr5rj7du/images/music-player.png)
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+This extension has no external dependencies beyond what is provided by Visual Studio Code.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
 This extension contributes the following settings:
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+* `music-player.savePath`: Set a custom directory to save downloaded audio files (default is the extension path).
+* `music-player.volume`: Default playback volume level (0.0 - 1.0).
+
+You can configure these in your VS Code user or workspace settings.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+* Currently only supports single-song playback (no playlist support yet).
+* Volume setting may not persist correctly across multiple sessions if manually edited elsewhere.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
 ### 1.0.0
 
-Initial release of ...
+Initial release with basic online music playback functionality.
 
 ### 1.0.1
 
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Added repeat playback and improved state persistence.
