@@ -65,6 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 		// 构造初始播放状态
+		const config = vscode.workspace.getConfiguration('music-player');
 		const state: PlayerState = {
 			name: detail.name,
 			artists: detail.artists,
@@ -72,10 +73,28 @@ export function activate(context: vscode.ExtensionContext) {
 			isPlaying: true,
 			currentTime: 0,
 			duration: 0,
-			volume: 1
+			volume: config.get<number>('volume', 1),
 		};
-		stateManager.setState(context, state);
-		showPlayerPanel(context, state);
+		const savePath = config.get<string>('savePath') || context.extensionPath;
+		const ext = path.extname(detail.sourceUrl);
+		const uri = vscode.Uri.file(path.join(savePath, `${detail.name}${ext}`));
+		await vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: `正在下载：${detail.name}`,
+			cancellable: false
+		}, async (progress) => {
+			try {
+				await vscode.workspace.fs.stat(uri);
+			} catch (e) {
+				// 文件不存在
+				await downloadFile(detail.sourceUrl, uri.fsPath);
+				vscode.window.showInformationMessage(`下载完成：${uri.fsPath}`);
+			}
+			// 下载完成后自动播放
+			stateManager.setState(context, state);
+			showPlayerPanel(context, state);
+		});
+		
 	});
 	context.subscriptions.push(playOnline);
 

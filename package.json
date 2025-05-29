@@ -22,14 +22,6 @@
     },
     "commands": [
       {
-        "command": "music-player.helloWorld",
-        "title": "Hello World"
-      },
-      {
-        "command": "music-player.selectAndDownload",
-        "title": "选择并下载塞壬唱片歌曲"
-      },
-      {
         "command": "music-player.playOnline",
         "title": "在线播放塞壬唱片歌曲"
       }
@@ -37,7 +29,7 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "music-player.selectAndDownload"
+          "command": "music-player.playOnline"
         }
       ]
     },
