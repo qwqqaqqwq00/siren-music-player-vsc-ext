@@ -5,10 +5,35 @@ import fetch from 'node-fetch';
 import * as fs from 'fs';
 import * as path from 'path';
 
+// 播放状态类型
+type PlayerState = {
+	name: string;
+	artists: string[];
+	sourceUrl: string;
+	isPlaying: boolean;
+	currentTime: number;
+	duration: number;
+	volume: number;
+};
+
+// 状态管理器
+const stateManager = {
+	getState(context: vscode.ExtensionContext): PlayerState | undefined {
+		return context.globalState.get('music-player.state');
+	},
+	setState(context: vscode.ExtensionContext, state: PlayerState) {
+		context.globalState.update('music-player.state', state);
+	},
+	clearState(context: vscode.ExtensionContext) {
+		context.globalState.update('music-player.state', undefined);
+	}
+};
+
+let playerPanel: vscode.WebviewPanel | undefined;
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "music-player" is now active!');
@@ -27,11 +52,38 @@ export function activate(context: vscode.ExtensionContext) {
 	const config = vscode.workspace.getConfiguration('music-player');
 	const savePath = config.get<string>('savePath') || '默认路径';
 
-	const selectAndDownload = vscode.commands.registerCommand('music-player.selectAndDownload', () => {
-		selectAndDownloadSong(context);
+	// 注册命令：在线播放
+	const playOnline = vscode.commands.registerCommand('music-player.playOnline', async () => {
+		const cid = await pickSong();
+		if (!cid) {
+			vscode.window.showWarningMessage('未选择任何歌曲');
+			return;
+		}
+		const detail = await fetchSongDetail(cid);
+		if (!detail.sourceUrl) {
+			vscode.window.showErrorMessage('未找到该歌曲的音频资源');
+			return;
+		}
+		// 构造初始播放状态
+		const state: PlayerState = {
+			name: detail.name,
+			artists: detail.artists,
+			sourceUrl: detail.sourceUrl,
+			isPlaying: true,
+			currentTime: 0,
+			duration: 0,
+			volume: 1
+		};
+		stateManager.setState(context, state);
+		showPlayerPanel(context, state);
 	});
+	context.subscriptions.push(playOnline);
 
-	context.subscriptions.push(selectAndDownload);
+	// 激活时自动恢复上次播放
+	const lastState = stateManager.getState(context);
+	if (lastState && lastState.sourceUrl) {
+		showPlayerPanel(context, lastState);
+	}
 }
 
 // This method is called when your extension is deactivated
@@ -58,7 +110,7 @@ async function pickSong(): Promise<string | undefined> {
 			description: song.artists.join(', '),
 			detail: song.cid,
 		})),
-		{ placeHolder: '选择一首歌曲进行下载' }
+		{ placeHolder: '选择一首歌曲在线播放' }
 	);
 	return pick?.detail;
 }
@@ -101,7 +153,7 @@ function createPlayerWebview(context: vscode.ExtensionContext, filePath: string)
 }
 
 // 参考CodePen样式，生成播放器HTML
-function getPlayerHtml(audioSrc: string, defaultVolume: number): string {
+function getPlayerHtml(audioSrc: string, defaultVolume: number, name: string = '正在播放'): string {
 	return `
 	<!DOCTYPE html>
 	<html lang="zh-CN">
@@ -207,7 +259,7 @@ function getPlayerHtml(audioSrc: string, defaultVolume: number): string {
 			<div class="player">
 				<div class="cover">🎵</div>
 				<div class="info">
-					<div id="song-title" style="font-weight:bold;">正在播放</div>
+					<div id="song-title" style="font-weight:bold;">${name}</div>
 					<div class="progress" id="progress">
 						<div class="progress-bar" id="progress-bar"></div>
 					</div>
@@ -286,38 +338,33 @@ function getPlayerHtml(audioSrc: string, defaultVolume: number): string {
 	`;
 }
 
-async function selectAndDownloadSong(context: vscode.ExtensionContext) {
-	const cid = await pickSong();
-	if (!cid) {
-		vscode.window.showWarningMessage('未选择任何歌曲');
+// ----------------- Panel管理 -----------------
+function showPlayerPanel(context: vscode.ExtensionContext, state: PlayerState) {
+	if (playerPanel) {
+		playerPanel.reveal(undefined, true);
+		playerPanel.webview.postMessage({ type: 'play', state });
 		return;
 	}
-	const detail = await fetchSongDetail(cid);
-	if (!detail.sourceUrl) {
-		vscode.window.showErrorMessage('未找到该歌曲的音频资源');
-		return;
-	}
+	playerPanel = vscode.window.createWebviewPanel(
+		'musicPlayer',
+		'音乐播放器',
+		{ viewColumn: vscode.ViewColumn.Beside, preserveFocus: false },
+		{ enableScripts: true, retainContextWhenHidden: true }
+	);
+	playerPanel.webview.html = getPlayerHtml(state.sourceUrl, state.volume, state.name);
+	playerPanel.onDidDispose(() => { playerPanel = undefined; });
 
-	// 自动识别文件后缀
-	const ext = detail.sourceUrl.endsWith('.mp3') ? '.mp3' : '.wav';
-	const config = vscode.workspace.getConfiguration('music-player');
-	const defaultPath = config.get<string>('savePath', context.extensionPath);
-
-	const uri = vscode.Uri.file(path.join(defaultPath, `${detail.name}${ext}`));
-	// 下载
-	await vscode.window.withProgress({
-		location: vscode.ProgressLocation.Notification,
-		title: `正在下载：${detail.name}`,
-		cancellable: false
-	}, async (progress) => {
-		try {
-			await vscode.workspace.fs.stat(uri);
-		} catch (e) {
-			// 文件不存在
-			await downloadFile(detail.sourceUrl, uri.fsPath);
-			vscode.window.showInformationMessage(`下载完成：${uri.fsPath}`);
+	// Webview与插件通信
+	playerPanel.webview.onDidReceiveMessage(msg => {
+		if (msg.type === 'updateState') {
+			// Webview主动上报播放状态
+			stateManager.setState(context, msg.state);
+		} else if (msg.type === 'getState') {
+			// Webview请求恢复状态
+			const last = stateManager.getState(context);
+			if (last) {
+				playerPanel?.webview.postMessage({ type: 'restoreState', state: last });
+			}
 		}
-		// 下载完成后自动播放
-		createPlayerWebview(context, uri.fsPath);
 	});
 }
