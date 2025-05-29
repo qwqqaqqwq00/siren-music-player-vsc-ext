@@ -12,6 +12,14 @@
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
+    "views": {
+      "explorer": [
+        {
+          "id": "music-player",
+          "name": "音乐播放器"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "music-player.helloWorld",

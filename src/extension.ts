@@ -221,7 +221,7 @@ function getPlayerHtml(audioSrc: string, defaultVolume: number): string {
 					</div>
 				</div>
 				<div class="controls">
-					<button id="play-pause">⏸️</button>
+					<button id="play-pause">▶️</button>
 				</div>
 			</div>
 			<audio id="audio" src="${audioSrc}" autoplay></audio>
@@ -300,25 +300,23 @@ async function selectAndDownloadSong(context: vscode.ExtensionContext) {
 
 	// 自动识别文件后缀
 	const ext = detail.sourceUrl.endsWith('.mp3') ? '.mp3' : '.wav';
+	const config = vscode.workspace.getConfiguration('music-player');
+	const defaultPath = config.get<string>('savePath', context.extensionPath);
 
-	// 选择保存路径
-	const uri = await vscode.window.showSaveDialog({
-		defaultUri: vscode.Uri.file(path.join(context.extensionPath, `${detail.name}${ext}`)),
-		filters: { 音频: ['wav', 'mp3'] }
-	});
-	if (!uri) {
-		vscode.window.showWarningMessage('未选择保存路径');
-		return;
-	}
-
+	const uri = vscode.Uri.file(path.join(defaultPath, `${detail.name}${ext}`));
 	// 下载
 	await vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
 		title: `正在下载：${detail.name}`,
 		cancellable: false
 	}, async (progress) => {
-		await downloadFile(detail.sourceUrl, uri.fsPath);
-		vscode.window.showInformationMessage(`下载完成：${uri.fsPath}`);
+		try {
+			await vscode.workspace.fs.stat(uri);
+		} catch (e) {
+			// 文件不存在
+			await downloadFile(detail.sourceUrl, uri.fsPath);
+			vscode.window.showInformationMessage(`下载完成：${uri.fsPath}`);
+		}
 		// 下载完成后自动播放
 		createPlayerWebview(context, uri.fsPath);
 	});
