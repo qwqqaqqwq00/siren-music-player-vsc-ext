@@ -16,7 +16,7 @@ A simple **music player extension** for Visual Studio Code that allows you to st
 
 ### Example Screenshot
 
-![Music Player Panel](vscode-webview://12umth60vshr7kt9flsqd2sivnfhuv3k4naaubf80ahtkr5rj7du/images/music-player.png)
+![img](example.png "example")
 
 ## Requirements
 
