@@ -1,6 +1,6 @@
 {
-  "name": "music-player",
-  "displayName": "music-player",
+  "name": "siren-music-player",
+  "displayName": "siren-music-player",
   "description": "",
   "version": "0.0.1",
   "engines": {
@@ -15,21 +15,21 @@
     "views": {
       "explorer": [
         {
-          "id": "music-player",
-          "name": "音乐播放器"
+          "id": "siren-music-player",
+          "name": "塞壬唱片音乐播放器"
         }
       ]
     },
     "commands": [
       {
-        "command": "music-player.playOnline",
+        "command": "siren-music-player.playOnline",
         "title": "在线播放塞壬唱片歌曲"
       }
     ],
     "menus": {
       "commandPalette": [
         {
-          "command": "music-player.playOnline"
+          "command": "siren-music-player.playOnline"
         }
       ]
     },
