@@ -1,4 +1,3 @@
-
 # music-player README
 
 A simple **music player extension** for Visual Studio Code that allows you to stream and play songs directly from the [Monster Siren](https://monster-siren.hypergryph.com/) music API. This extension supports searching, downloading, and playing songs without leaving your editor.
@@ -13,10 +12,6 @@ A simple **music player extension** for Visual Studio Code that allows you to st
 * 📁  **Resume on Startup** : Automatically resumes the last played track when VS Code restarts.
 
 > Tip: You can pin the player to always stay visible while working in other files.
-
-### Example Screenshot
-
-![img](example.png "example")
 
 ## Requirements
 
